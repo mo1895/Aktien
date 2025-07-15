@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Meine Aktienübersicht</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .stock {
+      margin-bottom: 60px;
+      padding: 20px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h2 {
+      margin-bottom: 5px;
+    }
+    .change-up {
+      color: green;
+    }
+    .change-down {
+      color: red;
+    }
+    .change-neutral {
+      color: gray;
+    }
+    .loading {
+      color: gray;
+      font-style: italic;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>📈 Meine Aktienkurse (alle in €)</h1>
+  <div id="stocks">
+    <p class="loading">Lade Aktiendaten...</p>
+  </div>
+
+  <script>
+    const stocks = [
+      { name: "Lufthansa", symbol: "LHA.DE", link: "https://www.finanzen.net/aktien/lufthansa-aktie" },
+      { name: "DroneShield", symbol: "DRO.AX", link: "https://www.finanzen.net/aktien/droneshield-aktie" },
+      { name: "BYD", symbol: "1211.HK", link: "https://www.finanzen.net/aktien/byd-aktie" },
+      { name: "Intel", symbol: "INTC", link: "https://www.finanzen.net/aktien/intel-aktie" },
+      { name: "Siemens Energy", symbol: "ENR.DE", link: "https://www.finanzen.net/aktien/siemens_energy-aktie" }
+    ];
+
+    // Wechselkurse zwischenspeichern
+    const exchangeRates = {
+      'AUD': 1,
+      'HKD': 1,
+      'USD': 1
+    };
+
+    // Hole Wechselkurse
+    async function fetchExchangeRates() {
+      try {
+        const proxyUrl = 'https://api.allorigins.win/get?url=';
+        const apiUrl = 'https://api.exchangerate-api.com/v4/latest/EUR';
+        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const data = await response.json();
+        const parsedData = JSON.parse(data.contents);
+        
+        // Speichere die inversen Kurse (Fremdwährung zu EUR)
+        exchangeRates['AUD'] = 1 / parsedData.rates.AUD;
+        exchangeRates['HKD'] = 1 / parsedData.rates.HKD;
+        exchangeRates['USD'] = 1 / parsedData.rates.USD;
+        
+        return true;
+      } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+        // Fallback-Wechselkurse
+        exchangeRates['AUD'] = 0.62; // Beispielkurs AUD -> EUR
+        exchangeRates['HKD'] = 0.12; // Beispielkurs HKD -> EUR
+        exchangeRates['USD'] = 0.93; // Beispielkurs USD -> EUR
+        return false;
+      }
+    }
+
+    async function fetchStockData(symbol) {
+      try {
+        const proxyUrl = 'https://api.allorigins.win/get?url=';
+        const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=1d`;
+        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const data = await response.json();
+        return JSON.parse(data.contents).chart.result[0];
+      } catch (error) {
+        console.error('Error fetching stock data:', error);
+        throw error;
+      }
+    }
+
+    function convertToEUR(price, symbol) {
+      if (symbol.endsWith('.DE')) return price; // Bereits in EUR
+      if (symbol.endsWith('.AX')) return price * exchangeRates['AUD']; // AUD zu EUR
+      if (symbol.endsWith('.HK')) return price * exchangeRates['HKD']; // HKD zu EUR
+      return price * exchangeRates['USD']; // USD zu EUR (für INTC)
+    }
+
+    function createChart(ctx, dates, prices, label) {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [{
+            label,
+            data: prices,
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          }
+        }
+      });
+    }
+
+    function getChangeClass(change) {
+      if (change > 0) return "change-up";
+      if (change < 0) return "change-down";
+      return "change-neutral";
+    }
+
+    async function loadStocks() {
+      const container = document.getElementById("stocks");
+      
+      // Zuerst Wechselkurse laden
+      const ratesLoaded = await fetchExchangeRates();
+      if (!ratesLoaded) {
+        container.innerHTML = '<p class="error">Wechselkurse konnten nicht geladen werden. Verwende Standardkurse.</p>';
+      } else {
+        container.innerHTML = '';
+      }
+
+      for (const stock of stocks) {
+        const stockDiv = document.createElement("div");
+        stockDiv.className = "stock";
+        stockDiv.innerHTML = `
+          <h2>${stock.name} (${stock.symbol})</h2>
+          <p class="loading">Lade Daten...</p>
+        `;
+        container.appendChild(stockDiv);
+
+        try {
+          const data = await fetchStockData(stock.symbol);
+          const timestamps = data.timestamp;
+          const prices = data.indicators.quote[0].close.filter(price => price !== null);
+          const dates = timestamps.map(ts => new Date(ts * 1000).toLocaleDateString());
+
+          if (prices.length < 2) {
+            throw new Error('Nicht genügend Datenpunkte');
+          }
+
+          // Umrechnung in EUR
+          const pricesEUR = prices.map(price => convertToEUR(price, stock.symbol));
+          const latestPrice = pricesEUR[pricesEUR.length - 1];
+          const prevPrice = pricesEUR[pricesEUR.length - 2];
+          const change = latestPrice - prevPrice;
+          const changePercent = (change / prevPrice) * 100;
+          const changeClass = getChangeClass(change);
+
+          stockDiv.innerHTML = `
+            <h2>${stock.name} (${stock.symbol})</h2>
+            <p>
+              Aktueller Kurs: <strong>${latestPrice.toFixed(2)} €</strong> 
+              <span class="${changeClass}">(${change >= 0 ? '+' : ''}${change.toFixed(2)} € / ${changePercent.toFixed(2)}%)</span>
+            </p>
+            <p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>
+            <canvas id="chart-${stock.symbol}" height="150"></canvas>
+          `;
+
+          const ctx = document.getElementById(`chart-${stock.symbol}`).getContext("2d");
+          createChart(ctx, dates, pricesEUR, `${stock.name} (in €)`);
+
+        } catch (err) {
+          console.error("Fehler bei", stock.symbol, err);
+          stockDiv.innerHTML = `
+            <h2>${stock.name} (${stock.symbol})</h2>
+            <p class="error">Daten konnten nicht geladen werden. Bitte versuchen Sie es später erneut.</p>
+            <p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>
+          `;
+        }
+      }
+    }
+
+    loadStocks();
+  </script>
+</body>
+</html>
