@@ -1,333 +1,394 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Meine Aktienübersicht</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    /* Originale Styles bleiben unverändert */
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .stock {
-      margin-bottom: 60px;
-      padding: 20px;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    h2 {
-      margin-bottom: 5px;
-    }
-    .change-up {
-      color: green;
-    }
-    .change-down {
-      color: red;
-    }
-    .change-neutral {
-      color: gray;
-    }
-    .loading {
-      color: gray;
-      font-style: italic;
-    }
-    .error {
-      color: red;
-    }
-    
-    /* Neue Styles für Erweiterungen */
-    .portfolio-summary {
-      background-color: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-      text-align: center;
-      border: 1px solid #dee2e6;
-    }
-    .total-value {
-      font-size: 1.8em;
-      font-weight: bold;
-      margin: 10px 0;
-      color: #2c3e50;
-    }
-    .refresh-btn {
-      display: block;
-      margin: 0 auto 20px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .refresh-btn:hover {
-      background-color: #45a049;
-    }
-    .position-value {
-      font-weight: bold;
-    }
-    .last-update {
-      text-align: center;
-      color: #666;
-      font-size: 0.9em;
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Meine Aktienübersicht</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+        }
+        .stock {
+            margin-bottom: 60px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            margin-bottom: 5px;
+        }
+        .change-up { color: green; }
+        .change-down { color: red; }
+        .change-neutral { color: gray; }
+        .loading { color: gray; font-style: italic; }
+        .error { color: red; }
+        .portfolio-summary {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        .total-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+        .refresh-btn {
+            display: block;
+            margin: 0 auto 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .refresh-btn:hover { background-color: #45a049; }
+        .position-value { font-weight: bold; }
+        .last-update {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <h1>📈 Meine Aktienkurse (alle in €)</h1>
-  <button id="refresh-btn" class="refresh-btn">🔃 Aktualisieren</button>
-  
-  <div id="portfolio-summary" class="portfolio-summary">
-    <h2>Portfolio Übersicht</h2>
-    <div id="total-value" class="total-value">Wird berechnet...</div>
-    <div id="portfolio-change" class="change-neutral"></div>
-  </div>
-  
-  <div id="stocks">
-    <p class="loading">Lade Aktiendaten...</p>
-  </div>
+    <h1>📈 Meine Aktienkurse (alle in €)</h1>
 
-  <div id="last-update" class="last-update"></div>
+    <button id="refresh-btn" class="refresh-btn">🔃 Aktualisieren</button>
 
-  <script>
-    // Originaler Code bleibt komplett unverändert
-    const stocks = [
-      { name: "Lufthansa", symbol: "LHA.DE", link: "https://www.finanzen.net/aktien/lufthansa-aktie", shares: 5 },
-      { name: "DroneShield", symbol: "DRO.AX", link: "https://www.finanzen.net/aktien/droneshield-aktie", shares: 30 },
-      { name: "BYD", symbol: "1211.HK", link: "https://www.finanzen.net/aktien/byd-aktie", shares: 4 },
-      { name: "Intel", symbol: "INTC", link: "https://www.finanzen.net/aktien/intel-aktie", shares: 2 },
-      { name: "Siemens Energy", symbol: "ENR.DE", link: "https://www.finanzen.net/aktien/siemens_energy-aktie", shares: 2 },
-      { name: "Clara Tech", symbol: "CLA.DE", link: "#", shares: 10, fixedPrice: 3.50 }
-    ];
+    <div id="portfolio-summary" class="portfolio-summary">
+        <h2>Portfolio Übersicht</h2>
+        <div id="total-value" class="total-value">Wird berechnet...</div>
+        <div id="portfolio-change" class="change-neutral"></div>
+    </div>
 
-    const exchangeRates = {
-      'AUD': 1,
-      'HKD': 1,
-      'USD': 1
-    };
+    <div id="stocks">
+        <p class="loading">Lade Aktiendaten...</p>
+    </div>
 
-    // Neue Variablen für Erweiterungen
-    let portfolioData = {
-      totalValue: 0,
-      previousValue: 0,
-      charts: {}
-    };
+    <div id="last-update" class="last-update"></div>
 
-    // Originale Funktionen bleiben unverändert
-    async function fetchExchangeRates() {
-      try {
-        const proxyUrl = 'https://api.allorigins.win/get?url=';
-        const apiUrl = 'https://api.exchangerate-api.com/v4/latest/EUR';
-        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-        
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        const data = await response.json();
-        const parsedData = JSON.parse(data.contents);
-        
-        exchangeRates['AUD'] = 1 / parsedData.rates.AUD;
-        exchangeRates['HKD'] = 1 / parsedData.rates.HKD;
-        exchangeRates['USD'] = 1 / parsedData.rates.USD;
-        
-        return true;
-      } catch (error) {
-        console.error('Error fetching exchange rates:', error);
-        exchangeRates['AUD'] = 0.62;
-        exchangeRates['HKD'] = 0.12;
-        exchangeRates['USD'] = 0.93;
-        return false;
-      }
-    }
+    <script>
+        const stocks = [
+            { name: "Lufthansa", symbol: "LHA.DE", link: "https://www.finanzen.net/aktien/lufthansa-aktie", shares: 5 },
+            { name: "DroneShield", symbol: "DRO.AX", link: "https://www.finanzen.net/aktien/droneshield-aktie", shares: 30 },
+            { name: "BYD", symbol: "1211.HK", link: "https://www.finanzen.net/aktien/byd-aktie", shares: 4 },
+            { name: "Intel", symbol: "INTC", link: "https://www.finanzen.net/aktien/intel-aktie", shares: 2 },
+            { name: "Siemens Energy", symbol: "ENR.DE", link: "https://www.finanzen.net/aktien/siemens_energy-aktie", shares: 2 },
+            { name: "Clara Tech", symbol: "CLA.DE", link: "#", shares: 10, fixedPrice: 3.50 }
+        ];
 
-    async function fetchStockData(symbol) {
-      try {
-        // Für Clara Tech festen Preis zurückgeben
-        if (symbol === "CLA.DE") {
-          return {
-            timestamp: Array.from({length: 5}, (_, i) => Math.floor(Date.now()/1000) - i*86400),
-            indicators: {
-              quote: [{
-                close: Array.from({length: 5}, () => 3.50)
-              }]
-            },
-            meta: {
-              regularMarketPrice: 3.50
+        const exchangeRates = {
+            'AUD': 1,
+            'HKD': 1,
+            'USD': 1
+        };
+
+        let portfolioData = {
+            totalValue: 0,
+            previousValue: 0,
+            charts: {}
+        };
+
+        // ============================
+        // Wechselkurse laden (mit CORS-Proxy)
+        // ============================
+        async function fetchExchangeRates() {
+            // Liste von CORS-Proxies zum Durchprobieren
+            const proxies = [
+                (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+                (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+                (url) => `https://cors-anywhere.com/${url}`
+            ];
+
+            const apiUrl = 'https://api.exchangerate-api.com/v4/latest/EUR';
+
+            for (const makeProxy of proxies) {
+                try {
+                    const proxyUrl = makeProxy(apiUrl);
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    let data = await response.json();
+
+                    // allorigins gibt die Daten in data.contents als String zurück
+                    if (data.contents && typeof data.contents === 'string') {
+                        data = JSON.parse(data.contents);
+                    }
+
+                    if (data.rates) {
+                        exchangeRates['AUD'] = 1 / data.rates.AUD;
+                        exchangeRates['HKD'] = 1 / data.rates.HKD;
+                        exchangeRates['USD'] = 1 / data.rates.USD;
+                        console.log('Wechselkurse geladen:', exchangeRates);
+                        return true;
+                    }
+                } catch (error) {
+                    console.warn('Proxy fehlgeschlagen, versuche nächsten...', error.message);
+                }
             }
-          };
-        }
 
-        const proxyUrl = 'https://api.allorigins.win/get?url=';
-        const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=1d`;
-        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-        
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        const data = await response.json();
-        return JSON.parse(data.contents).chart.result[0];
-      } catch (error) {
-        console.error('Error fetching stock data:', error);
-        throw error;
-      }
-    }
-
-    function convertToEUR(price, symbol) {
-      if (symbol.endsWith('.DE')) return price;
-      if (symbol.endsWith('.AX')) return price * exchangeRates['AUD'];
-      if (symbol.endsWith('.HK')) return price * exchangeRates['HKD'];
-      return price * exchangeRates['USD'];
-    }
-
-    function createChart(ctx, dates, prices, label) {
-      return new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: dates,
-          datasets: [{
-            label,
-            data: prices,
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            fill: true,
-            tension: 0.3
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: {
-              beginAtZero: false
+            // Fallback: Direkt ohne Proxy versuchen (funktioniert evtl. bei manchen APIs)
+            try {
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    exchangeRates['AUD'] = 1 / data.rates.AUD;
+                    exchangeRates['HKD'] = 1 / data.rates.HKD;
+                    exchangeRates['USD'] = 1 / data.rates.USD;
+                    return true;
+                }
+            } catch (e) {
+                console.warn('Direkter Abruf auch fehlgeschlagen');
             }
-          }
+
+            // Fallback-Kurse
+            console.warn('Verwende Fallback-Wechselkurse');
+            exchangeRates['AUD'] = 0.60;
+            exchangeRates['HKD'] = 0.12;
+            exchangeRates['USD'] = 0.92;
+            return false;
         }
-      });
-    }
 
-    function getChangeClass(change) {
-      if (change > 0) return "change-up";
-      if (change < 0) return "change-down";
-      return "change-neutral";
-    }
+        // ============================
+        // Aktien-Daten laden (mit CORS-Proxy-Fallback)
+        // ============================
+        async function fetchStockData(symbol) {
+            // Für Clara Tech festen Preis zurückgeben
+            if (symbol === "CLA.DE") {
+                const now = Math.floor(Date.now() / 1000);
+                return {
+                    timestamp: Array.from({length: 5}, (_, i) => now - i * 86400).reverse(),
+                    indicators: {
+                        quote: [{
+                            close: Array.from({length: 5}, () => 3.50)
+                        }]
+                    },
+                    meta: {
+                        regularMarketPrice: 3.50
+                    }
+                };
+            }
 
-    // Neue Funktionen für Erweiterungen
-    function updatePortfolioSummary(currentValue, previousValue) {
-      const totalValueElement = document.getElementById("total-value");
-      const changeElement = document.getElementById("portfolio-change");
-      
-      totalValueElement.textContent = `Gesamtwert: ${currentValue.toFixed(2)} €`;
-      
-      if (previousValue > 0) {
-        const change = currentValue - previousValue;
-        const changePercent = (change / previousValue) * 100;
-        const changeClass = getChangeClass(change);
-        
-        changeElement.className = changeClass;
-        changeElement.innerHTML = `
-          ${change >= 0 ? '+' : ''}${change.toFixed(2)} € (${changePercent.toFixed(2)}%)
-        `;
-      }
-      
-      document.getElementById("last-update").textContent = 
-        `Letzte Aktualisierung: ${new Date().toLocaleTimeString()}`;
-    }
+            const proxies = [
+                (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+                (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+                (url) => `https://cors-anywhere.com/${url}`
+            ];
 
-    // Modifizierte loadStocks Funktion mit Erweiterungen
-    async function loadStocks() {
-      const container = document.getElementById("stocks");
-      const ratesLoaded = await fetchExchangeRates();
-      
-      if (!ratesLoaded) {
-        container.innerHTML = '<p class="error">Wechselkurse konnten nicht geladen werden. Verwende Standardkurse.</p>';
-      } else {
-        container.innerHTML = '';
-      }
+            const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=1d`;
 
-      // Vorherigen Wert speichern
-      portfolioData.previousValue = portfolioData.totalValue;
-      portfolioData.totalValue = 0;
+            for (const makeProxy of proxies) {
+                try {
+                    const proxyUrl = makeProxy(apiUrl);
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    let data = await response.json();
 
-      for (const stock of stocks) {
-        const stockDiv = document.createElement("div");
-        stockDiv.className = "stock";
-        stockDiv.innerHTML = `
-          <h2>${stock.name} (${stock.symbol})</h2>
-          <p class="loading">Lade Daten...</p>
-        `;
-        container.appendChild(stockDiv);
+                    // allorigins gibt die Daten in data.contents als String zurück
+                    if (data.contents && typeof data.contents === 'string') {
+                        data = JSON.parse(data.contents);
+                    }
 
-        try {
-          const data = await fetchStockData(stock.symbol);
-          const timestamps = data.timestamp;
-          const prices = data.indicators.quote[0].close.filter(price => price !== null);
-          const dates = timestamps.map(ts => new Date(ts * 1000).toLocaleDateString());
+                    if (data.chart && data.chart.result && data.chart.result[0]) {
+                        return data.chart.result[0];
+                    } else if (data.chart && data.chart.error) {
+                        throw new Error(data.chart.error.description || 'Yahoo API Fehler');
+                    }
+                } catch (error) {
+                    console.warn(`Proxy fehlgeschlagen für ${symbol}:`, error.message);
+                }
+            }
 
-          if (prices.length < 2) {
-            throw new Error('Nicht genügend Datenpunkte');
-          }
-
-          const pricesEUR = prices.map(price => convertToEUR(price, stock.symbol));
-          const latestPrice = convertToEUR(data.meta?.regularMarketPrice || prices[prices.length - 1], stock.symbol);
-          const prevPrice = pricesEUR[pricesEUR.length - 2];
-          const change = latestPrice - prevPrice;
-          const changePercent = (change / prevPrice) * 100;
-          const changeClass = getChangeClass(change);
-          const positionValue = latestPrice * (stock.shares || 1);
-
-          // Zum Gesamtwert addieren
-          portfolioData.totalValue += positionValue;
-
-          stockDiv.innerHTML = `
-            <h2>${stock.name} (${stock.symbol})</h2>
-            <p>
-              Aktueller Kurs: <strong>${latestPrice.toFixed(2)} €</strong> 
-              <span class="${changeClass}">(${change >= 0 ? '+' : ''}${change.toFixed(2)} € / ${changePercent.toFixed(2)}%)</span>
-            </p>
-            ${stock.shares ? `<p>Anteile: ${stock.shares} | Wert: <strong>${positionValue.toFixed(2)} €</strong></p>` : ''}
-            <p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>
-            <canvas id="chart-${stock.symbol}" height="150"></canvas>
-          `;
-
-          const ctx = document.getElementById(`chart-${stock.symbol}`).getContext("2d");
-          portfolioData.charts[stock.symbol] = createChart(ctx, dates, pricesEUR, `${stock.name} (in €)`);
-
-        } catch (err) {
-          console.error("Fehler bei", stock.symbol, err);
-          stockDiv.innerHTML = `
-            <h2>${stock.name} (${stock.symbol})</h2>
-            <p class="error">Daten konnten nicht geladen werden. Bitte versuchen Sie es später erneut.</p>
-            ${stock.link ? `<p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>` : ''}
-          `;
+            throw new Error(`Konnte keine Daten für ${symbol} laden. Alle Proxies fehlgeschlagen.`);
         }
-      }
-      
-      // Portfolio-Zusammenfassung aktualisieren
-      updatePortfolioSummary(portfolioData.totalValue, portfolioData.previousValue);
-    }
 
-    // Manueller Refresh
-    document.getElementById('refresh-btn').addEventListener('click', function() {
-      this.disabled = true;
-      this.textContent = 'Lädt...';
-      loadStocks().finally(() => {
-        this.disabled = false;
-        this.textContent = '🔃 Aktualisieren';
-      });
-    });
+        // ============================
+        // Hilfsfunktionen
+        // ============================
+        function convertToEUR(price, symbol) {
+            if (symbol.endsWith('.DE')) return price;
+            if (symbol.endsWith('.AX')) return price * exchangeRates['AUD'];
+            if (symbol.endsWith('.HK')) return price * exchangeRates['HKD'];
+            return price * exchangeRates['USD']; // Default: USD
+        }
 
-    // Initialer Aufruf
-    loadStocks();
-  </script>
-</body>
-</html>
+        function createChart(ctx, dates, prices, label) {
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label,
+                        data: prices,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: false }
+                    }
+                }
+            });
+        }
+
+        function getChangeClass(change) {
+            if (change > 0) return "change-up";
+            if (change < 0) return "change-down";
+            return "change-neutral";
+        }
+
+        function updatePortfolioSummary(currentValue, previousValue) {
+            const totalValueElement = document.getElementById("total-value");
+            const changeElement = document.getElementById("portfolio-change");
+
+            totalValueElement.textContent = `Gesamtwert: ${currentValue.toFixed(2)} €`;
+
+            if (previousValue > 0) {
+                const change = currentValue - previousValue;
+                const changePercent = (change / previousValue) * 100;
+                const changeClass = getChangeClass(change);
+                changeElement.className = changeClass;
+                changeElement.innerHTML = `${change >= 0 ? '+' : ''}${change.toFixed(2)} € (${changePercent.toFixed(2)}%)`;
+            }
+
+            document.getElementById("last-update").textContent =
+                `Letzte Aktualisierung: ${new Date().toLocaleTimeString()}`;
+        }
+
+        // ============================
+        // Hauptfunktion: Aktien laden
+        // ============================
+        async function loadStocks() {
+            const container = document.getElementById("stocks");
+            container.innerHTML = '<p class="loading">Lade Aktiendaten...</p>';
+
+            const ratesLoaded = await fetchExchangeRates();
+
+            if (!ratesLoaded) {
+                container.innerHTML = '<p class="error">⚠️ Wechselkurse konnten nicht live geladen werden. Verwende Standardkurse.</p>';
+            } else {
+                container.innerHTML = '';
+            }
+
+            // Vorherige Charts zerstören, um Memory Leaks zu vermeiden
+            Object.values(portfolioData.charts).forEach(chart => {
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
+                }
+            });
+            portfolioData.charts = {};
+
+            // Vorherigen Wert speichern
+            portfolioData.previousValue = portfolioData.totalValue;
+            portfolioData.totalValue = 0;
+
+            for (const stock of stocks) {
+                const stockDiv = document.createElement("div");
+                stockDiv.className = "stock";
+                stockDiv.innerHTML = `
+                    <h2>${stock.name} (${stock.symbol})</h2>
+                    <p class="loading">Lade Daten...</p>
+                `;
+                container.appendChild(stockDiv);
+
+                try {
+                    const data = await fetchStockData(stock.symbol);
+                    const timestamps = data.timestamp || [];
+                    const closePrices = data.indicators.quote[0].close || [];
+
+                    // Null-Werte herausfiltern (mit Index-Zuordnung beibehalten)
+                    const validData = [];
+                    for (let i = 0; i < closePrices.length; i++) {
+                        if (closePrices[i] !== null && closePrices[i] !== undefined) {
+                            validData.push({
+                                date: timestamps[i] ? new Date(timestamps[i] * 1000).toLocaleDateString('de-DE') : `Tag ${i+1}`,
+                                price: closePrices[i]
+                            });
+                        }
+                    }
+
+                    if (validData.length < 2) {
+                        throw new Error('Nicht genügend Datenpunkte');
+                    }
+
+                    const dates = validData.map(d => d.date);
+                    const pricesEUR = validData.map(d => convertToEUR(d.price, stock.symbol));
+
+                    const latestPrice = convertToEUR(
+                        data.meta?.regularMarketPrice || validData[validData.length - 1].price,
+                        stock.symbol
+                    );
+                    const prevPrice = pricesEUR[pricesEUR.length - 2];
+                    const change = latestPrice - prevPrice;
+                    const changePercent = (change / prevPrice) * 100;
+                    const changeClass = getChangeClass(change);
+                    const positionValue = latestPrice * (stock.shares || 1);
+
+                    portfolioData.totalValue += positionValue;
+
+                    // Eindeutige Canvas-ID erstellen (Sonderzeichen ersetzen)
+                    const canvasId = `chart-${stock.symbol.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+                    stockDiv.innerHTML = `
+                        <h2>${stock.name} (${stock.symbol})</h2>
+                        <p>
+                            Aktueller Kurs: <strong>${latestPrice.toFixed(2)} €</strong>
+                            <span class="${changeClass}">(${change >= 0 ? '+' : ''}${change.toFixed(2)} € / ${changePercent.toFixed(2)}%)</span>
+                        </p>
+                        ${stock.shares ? `<p>Anteile: ${stock.shares} | Wert: <strong>${positionValue.toFixed(2)} €</strong></p>` : ''}
+                        <p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>
+                        <canvas id="${canvasId}" height="150"></canvas>
+                    `;
+
+                    const ctx = document.getElementById(canvasId).getContext("2d");
+                    portfolioData.charts[stock.symbol] = createChart(ctx, dates, pricesEUR, `${stock.name} (in €)`);
+
+                } catch (err) {
+                    console.error("Fehler bei", stock.symbol, err);
+                    stockDiv.innerHTML = `
+                        <h2>${stock.name} (${stock.symbol})</h2>
+                        <p class="error">❌ Daten konnten nicht geladen werden: ${err.message}</p>
+                        <p>Mögliche Ursachen: CORS-Proxy nicht erreichbar oder Yahoo Finance blockiert die Anfrage.</p>
+                        ${stock.link && stock.link !== '#' ? `<p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>` : ''}
+                    `;
+                }
+            }
+
+            updatePortfolioSummary(portfolioData.totalValue, portfolioData.previousValue);
+        }
+
+        // Manueller Refresh
+        document.getElementById('refresh-btn').addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = '⏳ Lädt...';
+            loadStocks().finally(() => {
+                this.disabled = false;
+                this.textContent = '🔃 Aktualisieren';
+            });
+        });
+
+        // Initialer Aufruf
+        loadStocks();
+    </script>
