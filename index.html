@@ -7,23 +7,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        
-        * {
-            box-sizing: border-box;
-        }
-        
+
+        * { box-sizing: border-box; }
+
         body {
             font-family: 'Orbitron', monospace;
             margin: 0;
             padding: 20px;
             min-height: 100vh;
-            background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3a 30%, #0f0f2a 70%, #000 100%);
+            background: linear-gradient(135deg, #0c0c1e, #1a1a3a, #0f0f2a, #000);
             background-attachment: fixed;
             color: #e0e7ff;
             overflow-x: hidden;
             position: relative;
         }
-        
+
         /* Sternenhimmel Animation */
         body::before {
             content: '';
@@ -32,7 +30,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 radial-gradient(2px 2px at 20px 30px, #eee, transparent),
                 radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
                 radial-gradient(1px 1px at 90px 40px, #fff, transparent),
@@ -44,19 +42,12 @@
             pointer-events: none;
             z-index: -1;
         }
-        
+
         @keyframes stars-twinkle {
-            0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(-150px) rotate(2deg); opacity: 0.7; }
+            0% { transform: translateY(0) rotate(0); opacity: 1; }
+            100% { transform: translateY(-150px) rotate(2deg); opacity: .7; }
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        
+
         h1 {
             text-align: center;
             margin-bottom: 30px;
@@ -66,426 +57,279 @@
             background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
-            animation: rainbow-glow 3s ease-in-out infinite alternate, glow 2s ease-in-out infinite alternate;
+            animation: rainbow-glow 3s infinite alternate, glow 2s infinite alternate;
         }
-        
+
         @keyframes rainbow-glow {
             0% { background-position: 0% 50%; }
             100% { background-position: 100% 50%; }
         }
-        
+
         @keyframes glow {
             from { filter: drop-shadow(0 0 15px #00d4ff); }
             to { filter: drop-shadow(0 0 30px #7b68ee); }
         }
-        
-        .controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-        
-        .refresh-btn, .auto-refresh {
+
+        .refresh-btn {
+            display: block;
+            margin: 0 auto 30px;
             padding: 18px 30px;
+            background: linear-gradient(45deg, #00d4ff, #0099cc, #00bfff);
             border: none;
             border-radius: 50px;
             cursor: pointer;
+            color: white;
             font-size: 16px;
             font-weight: 700;
-            font-family: 'Orbitron', monospace;
-            text-transform: uppercase;
+            font-family: Orbitron;
             letter-spacing: 2px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, .4);
+            transition: .3s;
         }
-        
-        .refresh-btn {
-            background: linear-gradient(45deg, #00d4ff, #0099cc, #00bfff);
-            color: #fff;
-        }
-        
+
         .refresh-btn:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.7);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, .7);
         }
-        
-        .auto-refresh {
-            background: linear-gradient(45deg, #ff6b9d, #ff8e8e, #ff4757);
-            box-shadow: 0 10px 40px rgba(255, 107, 157, 0.4);
-        }
-        
-        .auto-refresh:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 20px 60px rgba(255, 107, 157, 0.7);
-        }
-        
-        .live-indicator {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            background: linear-gradient(45deg, #00ff88, #00d4ff);
-            border-radius: 50%;
-            margin-right: 10px;
-            animation: pulse 1.2s infinite;
-            box-shadow: 0 0 15px #00ff88;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 15px #00ff88; }
-            50% { transform: scale(1.3); opacity: 0.8; box-shadow: 0 0 25px #00ff88; }
-            100% { transform: scale(1); opacity: 1; box-shadow: 0 0 15px #00ff88; }
-        }
-        
+
         .stock {
+            background: rgba(20,25,70,.85);
             margin-bottom: 40px;
-            padding: 30px;
-            background: rgba(20, 25, 70, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 212, 255, 0.4);
-            border-radius: 25px;
-            box-shadow: 
-                0 25px 80px rgba(0, 0, 0, 0.6), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.15),
-                0 0 50px rgba(0, 212, 255, 0.1);
-            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: relative;
-            overflow: hidden;
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(0,212,255,.4);
+            box-shadow: 0 25px 80px rgba(0,0,0,.6);
         }
-        
-        .stock::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #00d4ff, #7b68ee, #ff6b9d, #00ff88);
-            animation: border-glow 3s linear infinite;
-        }
-        
-        @keyframes border-glow {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 400% 50%; }
-        }
-        
-        .stock:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 
-                0 40px 120px rgba(0, 212, 255, 0.5), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                0 0 80px rgba(0, 212, 255, 0.3);
-            border-color: rgba(0, 212, 255, 0.8);
-        }
-        
-        h2 {
-            margin: 0 0 20px 0;
-            font-size: 1.8em;
-            background: linear-gradient(45deg, #00d4ff, #00ff88);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 15px rgba(0, 212, 255, 0.7);
-        }
-        
-        .price-row {
-            font-size: 1.4em;
-            margin-bottom: 15px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-        
-        .change-up { 
-            color: #00ff88; 
-            text-shadow: 0 0 20px #00ff88;
-            animation: price-glow-green 1.5s ease-in-out infinite alternate;
-        }
-        
-        .change-down { 
-            color: #ff6b9d; 
-            text-shadow: 0 0 20px #ff6b9d;
-            animation: price-glow-red 1.5s ease-in-out infinite alternate;
-        }
-        
-        @keyframes price-glow-green {
-            from { text-shadow: 0 0 15px #00ff88; }
-            to { text-shadow: 0 0 25px #00ff88, 0 0 35px #00ff88; }
-        }
-        
-        @keyframes price-glow-red {
-            from { text-shadow: 0 0 15px #ff6b9d; }
-            to { text-shadow: 0 0 25px #ff6b9d
 
+        .change-up { color: #00ff88; font-weight: bold; }
+        .change-down { color: #ff6b9d; font-weight: bold; }
+        .change-neutral { color: #ccc; font-weight: bold; }
+
+        .rating-section { margin-top: 15px; }
+        .rating-comment { font-size: 14px; margin-top: 8px; opacity: .9; }
+
+        a { color: #00d4ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+    </style>
+</head>
 <body>
-    <h1>📈 Meine Aktienkurse (alle in €) + Bewertungen</h1>
 
-    <button id="refresh-btn" class="refresh-btn">🔃 Aktualisieren</button>
+<h1>📈 Meine Aktienkurse (alle in €) + Bewertungen</h1>
+<button id="refresh-btn" class="refresh-btn">🔃 Aktualisieren</button>
 
-    <div id="portfolio-summary" class="portfolio-summary">
-        <h2>Portfolio Übersicht</h2>
-        <div id="total-value" class="total-value">Wird berechnet...</div>
-        <div id="portfolio-change" class="change-neutral"></div>
-    </div>
+<div id="portfolio-summary">
+    <h2>Portfolio Übersicht</h2>
+    <div id="total-value">Wird berechnet...</div>
+    <div id="portfolio-change" class="change-neutral"></div>
+</div>
 
-    <div id="stocks">
-        <p class="loading">Lade Aktiendaten...</p>
-    </div>
+<div id="stocks"><p>Lade Aktiendaten...</p></div>
 
-    <div id="last-update" class="last-update"></div>
+<div id="last-update"></div>
 
-    <script>
-        const stocks = [
-            { 
-                name: "Lufthansa", 
-                symbol: "LHA.DE", 
-                link: "https://www.finanzen.net/aktien/lufthansa-aktie", 
-                shares: 5,
-                rating: { score: 3.5, comment: "Leicht unterbewertet, positive Prognosen bis 2026. Analysten neutral → Buy-Potenzial!" }[web:63][web:61]
-            },
-            { 
-                name: "DroneShield", 
-                symbol: "DRO.AX", 
-                link: "https://www.finanzen.net/aktien/droneshield-aktie", 
-                shares: 30,
-                rating: { score: 4.5, comment: "Explosives Wachstum erwartet: Umsatz +275% 2025! Starkes Buy!" }[web:64]
-            },
-            { 
-                name: "BYD", 
-                symbol: "1211.HK", 
-                link: "https://www.finanzen.net/aktien/byd-aktie", 
-                shares: 4,
-                rating: { score: 4.0, comment: "EV-Markt Leader, Kursziel 280 HKD. 31/34 Analysten: Buy!" }[web:65][web:71]
-            },
-            { 
-                name: "Intel", 
-                symbol: "INTC", 
-                link: "https://www.finanzen.net/aktien/intel-aktie", 
-                shares: 2,
-                rating: { score: 2.5, comment: "Stark unterbewertet aber hohes Risiko. Negative Analystenhaltung." }[web:66]
-            },
-            { 
-                name: "Siemens Energy", 
-                symbol: "ENR.DE", 
-                link: "https://www.finanzen.net/aktien/siemens_energy-aktie", 
-                shares: 2,
-                rating: { score: 3.8, comment: "Leicht unterbewertet, +23% Performance. Mittelrisiko → Halten/Buy." }[web:67]
-            },
-            { 
-                name: "Clara Tech", 
-                symbol: "CLA.DE", 
-                link: "#", 
-                shares: 10,
-                rating: { score: 2.0, comment: "Kleines Tech-Unternehmen, hohe Volatilität. Spekulativ." }[web:68],
-                fixedPrice: 3.50 
-            }
-        ];
+<script>
+/* ------------------ KONFIG ------------------ */
 
-        const exchangeRates = {'AUD': 0.60, 'HKD': 0.12, 'USD': 0.92};
-        let portfolioData = {totalValue: 0, previousValue: 0, charts: {}};
+const stocks = [
+    {
+        name: "Lufthansa",
+        symbol: "LHA.DE",
+        link: "https://www.finanzen.net/aktien/lufthansa-aktie",
+        shares: 5,
+        rating: { score: 3.5, comment: "Leicht unterbewertet, positive Prognosen bis 2026. Analysten neutral → Buy-Potenzial!" }
+    },
+    {
+        name: "DroneShield",
+        symbol: "DRO.AX",
+        link: "https://www.finanzen.net/aktien/droneshield-aktie",
+        shares: 30,
+        rating: { score: 4.5, comment: "Explosives Wachstum erwartet – starkes BUY!" }
+    },
+    {
+        name: "BYD",
+        symbol: "1211.HK",
+        link: "https://www.finanzen.net/aktien/byd-aktie",
+        shares: 4,
+        rating: { score: 4.0, comment: "EV-Markt Leader. Buy!" }
+    },
+    {
+        name: "Intel",
+        symbol: "INTC",
+        link: "https://www.finanzen.net/aktien/intel-aktie",
+        shares: 2,
+        rating: { score: 2.5, comment: "Unterbewertet, aber hohes Risiko." }
+    },
+    {
+        name: "Siemens Energy",
+        symbol: "ENR.DE",
+        link: "https://www.finanzen.net/aktien/siemens_energy-aktie",
+        shares: 2,
+        rating: { score: 3.8, comment: "Leicht unterbewertet. Halten/Buy." }
+    },
+    {
+        name: "Clara Tech",
+        symbol: "CLA.DE",
+        link: "#",
+        shares: 10,
+        rating: { score: 2.0, comment: "Sehr spekulativ." },
+        fixedPrice: 3.50
+    }
+];
 
-        async function fetchStockData(symbol) {
-            if (symbol === "CLA.DE") {
-                const now = Math.floor(Date.now() / 1000);
-                return {
-                    timestamp: Array.from({length: 5}, (_, i) => now - i * 86400).reverse(),
-                    indicators: { quote: [{ close: Array.from({length: 5}, () => 3.50) }] },
-                    meta: { regularMarketPrice: 3.50 }
-                };
-            }
+const exchangeRates = { AUD: 0.60, HKD: 0.12, USD: 0.92 };
+let portfolioData = { totalValue: 0, previousValue: 0 };
 
-            const proxies = [
-                url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-                url => `https://cors-anywhere.herokuapp.com/${url}`,
-                url => `https://thingproxy.freeboard.io/fetch/${url}`
-            ];
+/* ------------------ API ------------------ */
 
-            const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=1d`;
+async function fetchStockData(symbol) {
+    if (symbol === "CLA.DE") {
+        const now = Math.floor(Date.now() / 1000);
+        return {
+            timestamp: [1,2,3,4,5].map(i => now - (5-i)*86400),
+            indicators: { quote: [{ close: [3.5,3.5,3.5,3.5,3.5] }] },
+            meta: { regularMarketPrice: 3.5 }
+        };
+    }
 
-            for (let i = 0; i < proxies.length; i++) {
-                try {
-                    const proxyUrl = proxies[i](apiUrl);
-                    const resp = await fetch(proxyUrl, {cache: 'no-cache'});
-                    if (!resp.ok) throw new Error(`Proxy ${i+1} failed`);
+    const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=1d`;
+    const proxies = [
+        url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+    ];
 
-                    let data = await resp.json();
-                    if (data.contents) data = JSON.parse(data.contents);
+    for (const proxy of proxies) {
+        try {
+            let url = proxy(apiUrl);
+            let res = await fetch(url);
+            let data = await res.json();
 
-                    if (data.chart?.result?.[0]) {
-                        console.log(`✅ Proxy ${i+1} erfolgreich für ${symbol}`);
-                        return data.chart.result[0];
-                    }
-                } catch (e) {
-                    console.warn(`Proxy ${i+1} fehlgeschlagen für ${symbol}:`, e.message);
-                }
-            }
+            if (data.contents) data = JSON.parse(data.contents);
+            if (data.chart?.result?.[0]) return data.chart.result[0];
 
-            console.warn(`❌ Alle Proxies fehlgeschlagen für ${symbol}. Simuliere Daten.`);
-            return simulateStockData(symbol);
-        }
+        } catch (e) { continue; }
+    }
 
-        function simulateStockData(symbol) {
-            const basePrices = {'LHA.DE': 5.80, 'DRO.AX': 0.25, '1211.HK': 250, 'INTC': 25, 'ENR.DE': 28};
-            const base = basePrices[symbol] || 10;
-            const now = Math.floor(Date.now() / 1000);
-            const prices = [base*0.98, base*0.99, base, base*1.01, base*1.02];
-            return {
-                timestamp: Array.from({length: 5}, (_, i) => now - i * 86400).reverse(),
-                indicators: { quote: [{ close: prices }] },
-                meta: { regularMarketPrice: base*1.02 }
-            };
-        }
+    return simulate(symbol);
+}
 
-        function convertToEUR(price, symbol) {
-            if (symbol.endsWith('.DE')) return price;
-            if (symbol.endsWith('.AX')) return price * exchangeRates['AUD'];
-            if (symbol.endsWith('.HK')) return price * exchangeRates['HKD'];
-            return price * exchangeRates['USD'];
-        }
+function simulate(symbol) {
+    const base = { "LHA.DE": 5.8, "DRO.AX": 0.25, "1211.HK": 250, "INTC": 25, "ENR.DE": 28 }[symbol] || 10;
+    const now = Date.now()/1000;
 
-        function createChart(ctx, dates, prices, label) {
-            return new Chart(ctx, {
-                type: 'line',
-                data: { labels: dates, datasets: [{ label, data: prices, borderColor: 'rgb(75,192,192)', backgroundColor: 'rgba(75,192,192,0.2)', fill: true, tension: 0.3 }] },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } }
-            });
-        }
+    return {
+        timestamp: [1,2,3,4,5].map(i => now - (5-i)*86400),
+        indicators: { quote: [{ close: [base*0.98, base*0.99, base, base*1.01, base*1.02] }] },
+        meta: { regularMarketPrice: base*1.02 }
+    };
+}
 
-        function getChangeClass(change) {
-            if (change > 0) return "change-up";
-            if (change < 0) return "change-down";
-            return "change-neutral";
-        }
+function convertToEUR(price, symbol) {
+    if (symbol.endsWith(".DE")) return price;
+    if (symbol.endsWith(".AX")) return price * exchangeRates.AUD;
+    if (symbol.endsWith(".HK")) return price * exchangeRates.HKD;
+    return price * exchangeRates.USD;
+}
 
-        function createRatingHTML(stock) {
-            const rating = stock.rating;
-            const fullStars = Math.floor(rating.score);
-            const hasHalf = rating.score % 1 !== 0;
-            let starsHTML = '';
-            
-            for (let i = 0; i < 5; i++) {
-                if (i < fullStars) {
-                    starsHTML += '<i class="fas fa-star stars filled"></i>';
-                } else if (i === fullStars && hasHalf) {
-                    starsHTML += '<i class="fas fa-star-half-alt stars filled"></i>';
-                } else {
-                    starsHTML += '<i class="far fa-star stars"></i>';
-                }
-            }
-            
-            return `
+/* ------------- RENDERN ---------------- */
+
+function starRating(rating) {
+    let full = Math.floor(rating);
+    let half = rating % 1 !== 0;
+    let html = "";
+
+    for (let i = 0; i < 5; i++) {
+        if (i < full) html += '<i class="fas fa-star"></i>';
+        else if (i === full && half) html += '<i class="fas fa-star-half-alt"></i>';
+        else html += '<i class="far fa-star"></i>';
+    }
+
+    return html;
+}
+
+async function loadStocks() {
+    const container = document.getElementById("stocks");
+    container.innerHTML = "<p>Lade...</p>";
+
+    portfolioData.previousValue = portfolioData.totalValue;
+    portfolioData.totalValue = 0;
+
+    container.innerHTML = "";
+
+    for (const stock of stocks) {
+        const div = document.createElement("div");
+        div.className = "stock";
+        div.innerHTML = `<h2>${stock.name} (${stock.symbol})</h2><p>Daten werden geladen...</p>`;
+        container.appendChild(div);
+
+        try {
+            const data = await fetchStockData(stock.symbol);
+
+            const timestamps = data.timestamp;
+            const prices = data.indicators.quote[0].close;
+
+            const pricesEUR = prices.map(p => convertToEUR(p, stock.symbol));
+            const latest = convertToEUR(data.meta.regularMarketPrice, stock.symbol);
+            const prev = pricesEUR[pricesEUR.length-2];
+            const diff = latest - prev;
+
+            const changeClass = diff > 0 ? "change-up" : diff < 0 ? "change-down" : "change-neutral";
+
+            const positionValue = latest * stock.shares;
+            portfolioData.totalValue += positionValue;
+
+            div.innerHTML = `
+                <h2>${stock.name} (${stock.symbol})</h2>
+
+                <p>Aktueller Kurs:
+                    <strong>${latest.toFixed(2)} €</strong>
+                    <span class="${changeClass}">
+                        (${diff>=0?'+':''}${diff.toFixed(2)} €)
+                    </span>
+                </p>
+
+                <p>Anteile: ${stock.shares} – Wert:
+                    <strong>${positionValue.toFixed(2)} €</strong>
+                </p>
+
                 <div class="rating-section">
-                    <div style="display: flex; align-items: center;">
-                        <span class="stars">${starsHTML}</span>
-                        <span class="rating-score">${rating.score}/5</span>
-                        <span class="rating-label">Meine Bewertung</span>
-                    </div>
-                    <div class="rating-comment">${rating.comment}</div>
+                    <div>${starRating(stock.rating.score)} ${stock.rating.score}/5</div>
+                    <div class="rating-comment">${stock.rating.comment}</div>
                 </div>
+
+                <p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>
+            `;
+        } catch (e) {
+            div.innerHTML = `
+                <h2>${stock.name}</h2>
+                <p class="change-down">Fehler beim Laden</p>
             `;
         }
+    }
 
-        function updatePortfolioSummary(currentValue, previousValue) {
-            document.getElementById("total-value").textContent = `Gesamtwert: ${currentValue.toFixed(2)} €`;
-            const changeEl = document.getElementById("portfolio-change");
-            if (previousValue > 0) {
-                const change = currentValue - previousValue;
-                const changePercent = (change / previousValue) * 100;
-                const changeClass = getChangeClass(change);
-                changeEl.className = changeClass;
-                changeEl.innerHTML = `${change >= 0 ? '+' : ''}${change.toFixed(2)} € (${changePercent.toFixed(2)}%)`;
-            }
-            document.getElementById("last-update").textContent = `Letzte Aktualisierung: ${new Date().toLocaleTimeString()}`;
-        }
+    updateSummary();
+}
 
-        async function loadStocks() {
-            const container = document.getElementById("stocks");
-            container.innerHTML = '<p class="loading">Lade Aktiendaten...</p>';
+function updateSummary() {
+    document.getElementById("total-value")
+        .textContent = "Gesamtwert: " + portfolioData.totalValue.toFixed(2) + " €";
 
-            Object.values(portfolioData.charts).forEach(chart => chart?.destroy?.());
-            portfolioData.charts = {};
-            portfolioData.previousValue = portfolioData.totalValue;
-            portfolioData.totalValue = 0;
+    const change = portfolioData.totalValue - portfolioData.previousValue;
+    const el = document.getElementById("portfolio-change");
 
-            for (const stock of stocks) {
-                const stockDiv = document.createElement("div");
-                stockDiv.className = "stock";
-                stockDiv.innerHTML = `<h2>${stock.name} (${stock.symbol})</h2><p class="loading">Lade Daten...</p>`;
-                container.appendChild(stockDiv);
+    if (portfolioData.previousValue > 0) {
+        el.className = change > 0 ? "change-up" : change < 0 ? "change-down" : "change-neutral";
+        el.textContent = (change>=0?"+":"") + change.toFixed(2) + " €";
+    }
 
-                try {
-                    const data = await fetchStockData(stock.symbol);
-                    const timestamps = data.timestamp || [];
-                    const closePrices = data.indicators?.quote?.[0]?.close || [];
+    document.getElementById("last-update").textContent =
+        "Letzte Aktualisierung: " + new Date().toLocaleTimeString();
+}
 
-                    const validData = [];
-                    for (let i = 0; i < closePrices.length; i++) {
-                        if (closePrices[i] !== null && closePrices[i] !== undefined) {
-                            validData.push({
-                                date: timestamps[i] ? new Date(timestamps[i] * 1000).toLocaleDateString('de-DE') : `Tag ${i+1}`,
-                                price: closePrices[i]
-                            });
-                        }
-                    }
+document.getElementById("refresh-btn").onclick = () => loadStocks();
+loadStocks();
 
-                    if (validData.length < 2) throw new Error('Zu wenig Daten');
+</script>
 
-                    const dates = validData.map(d => d.date);
-                    const pricesEUR = validData.map(d => convertToEUR(d.price, stock.symbol));
-                    const latestPrice = convertToEUR(data.meta?.regularMarketPrice || validData[validData.length - 1].price, stock.symbol);
-                    const prevPrice = pricesEUR[pricesEUR.length - 2];
-                    const change = latestPrice - prevPrice;
-                    const changePercent = (change / prevPrice) * 100;
-                    const changeClass = getChangeClass(change);
-                    const positionValue = latestPrice * (stock.shares || 1);
-
-                    portfolioData.totalValue += positionValue;
-
-                    const canvasId = `chart-${stock.symbol.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    stockDiv.innerHTML = `
-                        <h2>${stock.name} (${stock.symbol})</h2>
-                        <p>Aktueller Kurs: <strong>${latestPrice.toFixed(2)} €</strong>
-                        <span class="${changeClass}">(${change >= 0 ? '+' : ''}${change.toFixed(2)} € / ${changePercent.toFixed(2)}%)</span></p>
-                        ${stock.shares ? `<p>Anteile: ${stock.shares} | Wert: <strong>${positionValue.toFixed(2)} €</strong></p>` : ''}
-                        
-                        ${createRatingHTML(stock)}
-                        
-                        <p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>
-                        <canvas id="${canvasId}" height="150"></canvas>
-                    `;
-
-                    const ctx = document.getElementById(canvasId).getContext("2d");
-                    portfolioData.charts[stock.symbol] = createChart(ctx, dates, pricesEUR, `${stock.name} (in €)`);
-
-                } catch (err) {
-                    console.error("Fehler bei", stock.symbol, err);
-                    stockDiv.innerHTML = `
-                        <h2>${stock.name} (${stock.symbol})</h2>
-                        <p class="error">❌ Fehler: ${err.message}</p>
-                        ${createRatingHTML(stock)}
-                        ${stock.link !== '#' ? `<p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>` : ''}
-                    `;
-                }
-            }
-
-            updatePortfolioSummary(portfolioData.totalValue, portfolioData.previousValue);
-        }
-
-        document.getElementById('refresh-btn').addEventListener('click', function() {
-            this.disabled = true;
-            this.textContent = '⏳ Lädt...';
-            loadStocks().finally(() => {
-                this.disabled = false;
-                this.textContent = '🔃 Aktualisieren';
-            });
-        });
-
-        loadStocks();
-    </script>
 </body>
 </html>
