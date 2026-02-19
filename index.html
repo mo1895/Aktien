@@ -2,183 +2,456 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Marktübersicht</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .item { margin-bottom: 60px; }
-    h2 { margin-bottom: 5px; }
-    .change-up { color: green; }
-    .change-down { color: red; }
-    .change-neutral { color: gray; }
-    #refresh-btn {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      padding: 80px 20px 40px;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
       position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 20px;
-      background-color: #0055aa;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 999;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .topbar h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    #last-update {
+      font-size: 12px;
+      color: #888;
+    }
+
+    #refresh-btn {
+      padding: 8px 18px;
+      background: #0055cc;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-weight: bold;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      z-index: 999;
+      transition: background 0.2s;
+    }
+
+    #refresh-btn:hover { background: #0044aa; }
+    #refresh-btn:disabled { background: #aaa; cursor: default; }
+
+    /* ── Layout ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      border: 1px solid #e8e8e8;
+      transition: box-shadow 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .card-symbol {
+      font-size: 12px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .card-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: #f0f2f5;
+      color: #555;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .price-main {
+      font-size: 26px;
+      font-weight: 800;
+      color: #1a1a2e;
+    }
+
+    .price-change {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .change-up   { color: #16a34a; background: #dcfce7; }
+    .change-down { color: #dc2626; background: #fee2e2; }
+    .change-neutral { color: #555;  background: #f0f0f0; }
+
+    .card-link {
+      font-size: 12px;
+      color: #0055cc;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 14px;
+    }
+
+    .card-link:hover { text-decoration: underline; }
+
+    .card-error {
+      color: #dc2626;
+      font-size: 13px;
+      padding: 10px 0;
+    }
+
+    canvas { width: 100% !important; }
+
+    /* ── Skeleton Loader ── */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+      height: 18px;
+      margin-bottom: 10px;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Status Banner ── */
+    #status-banner {
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 16px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
     }
   </style>
 </head>
 <body>
-  <button id="refresh-btn">🔄 Aktualisieren</button>
-  <h1>📈 Marktübersicht in Euro (Live)</h1>
-  <div id="stocks"></div>
-  <div id="gold" class="item"></div>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <h1>📈 Live Marktübersicht</h1>
+    <div class="topbar-right">
+      <span id="last-update"></span>
+      <button id="refresh-btn">🔄 Aktualisieren</button>
+    </div>
+  </div>
+
+  <div id="status-banner"></div>
+
+  <!-- Grid -->
+  <div class="grid" id="grid"></div>
 
   <script>
-    const stocks = [
-      { name: "Clara Technologies", symbol: "CLTE.CA", currency: "CAD", link: "https://www.finanzen.net/aktien/clara_technologies-aktie" },
-      { name: "Lufthansa", symbol: "LHA.DE", currency: "EUR", link: "https://www.finanzen.net/aktien/lufthansa-aktie" },
-      { name: "DroneShield", symbol: "DRO.AX", currency: "AUD", link: "https://www.finanzen.net/aktien/droneshield-aktie" },
-      { name: "BYD", symbol: "1211.HK", currency: "HKD", link: "https://www.finanzen.net/aktien/byd-aktie" },
-      { name: "Intel", symbol: "INTC", currency: "USD", link: "https://www.finanzen.net/aktien/intel-aktie" },
-      { name: "Siemens Energy", symbol: "ENR.DE", currency: "EUR", link: "https://www.finanzen.net/aktien/siemens_energy-aktie" }
-    ];
+  /* ════════════════════════════════════════
+     KONFIGURATION
+  ════════════════════════════════════════ */
+  const STOCKS = [
+    { name: "Clara Technologies", symbol: "CLTE.CA", currency: "CAD", link: "https://www.finanzen.net/aktien/clara_technologies-aktie" },
+    { name: "Lufthansa",          symbol: "LHA.DE",  currency: "EUR", link: "https://www.finanzen.net/aktien/lufthansa-aktie" },
+    { name: "DroneShield",        symbol: "DRO.AX",  currency: "AUD", link: "https://www.finanzen.net/aktien/droneshield-aktie" },
+    { name: "BYD",                symbol: "1211.HK", currency: "HKD", link: "https://www.finanzen.net/aktien/byd-aktie" },
+    { name: "Intel",              symbol: "INTC",    currency: "USD", link: "https://www.finanzen.net/aktien/intel-aktie" },
+    { name: "Siemens Energy",     symbol: "ENR.DE",  currency: "EUR", link: "https://www.finanzen.net/aktien/siemens_energy-aktie" },
+    { name: "Gold (10g)",         symbol: "GC=F",    currency: "USD", isGold: true, link: "https://www.finanzen.net/rohstoffe/goldpreis" }
+  ];
 
-    const fxRates = {};
-    const charts = {};
+  /* Feste Fallback-Kurse falls FX-API versagt */
+  const FX_FALLBACK = { EUR: 1, USD: 0.92, AUD: 0.60, HKD: 0.12, CAD: 0.68 };
 
-    async function fetchExchangeRate(from) {
-      if (from === "EUR") return 1;
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${from}EUR=X?range=1d&interval=1d`;
-      const resp = await fetch(url);
-      const data = await resp.json();
-      return data.chart.result[0].meta.regularMarketPrice;
+  /* CORS-Proxies */
+  const PROXIES = [
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`
+  ];
+
+  /* Gespeicherte Charts */
+  const charts = {};
+  let fxRates = { ...FX_FALLBACK };
+
+  /* ════════════════════════════════════════
+     FETCH HELPER mit Proxy-Fallback
+  ════════════════════════════════════════ */
+  async function fetchJSON(apiUrl) {
+    for (const proxy of PROXIES) {
+      try {
+        const res = await fetch(proxy(apiUrl), { cache: "no-cache" });
+        if (!res.ok) continue;
+        let json = await res.json();
+        if (json.contents) json = JSON.parse(json.contents);
+        return json;
+      } catch (_) { /* nächsten Proxy probieren */ }
+    }
+    throw new Error("Alle Proxies fehlgeschlagen");
+  }
+
+  /* ════════════════════════════════════════
+     WECHSELKURSE laden
+  ════════════════════════════════════════ */
+  async function loadFxRates() {
+    const currencies = [...new Set(STOCKS.map(s => s.currency))].filter(c => c !== "EUR");
+    await Promise.all(currencies.map(async cur => {
+      try {
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${cur}EUR=X?range=1d&interval=1d`;
+        const json = await fetchJSON(url);
+        const rate = json.chart?.result?.[0]?.meta?.regularMarketPrice;
+        if (rate) fxRates[cur] = rate;
+      } catch (_) { /* Fallback bleibt */ }
+    }));
+  }
+
+  /* ════════════════════════════════════════
+     KURS-DATEN laden
+  ════════════════════════════════════════ */
+  async function fetchChartData(symbol) {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=1d`;
+    const json = await fetchJSON(url);
+    const result = json.chart?.result?.[0];
+    if (!result) throw new Error("Keine Daten");
+    return result;
+  }
+
+  /* ════════════════════════════════════════
+     CHART erstellen / updaten
+  ════════════════════════════════════════ */
+  function renderChart(canvasId, labels, prices, isUp) {
+    const color = isUp ? "#16a34a" : "#dc2626";
+    const bgColor = isUp ? "rgba(22,163,74,0.08)" : "rgba(220,38,38,0.08)";
+
+    if (charts[canvasId]) {
+      const c = charts[canvasId];
+      c.data.labels = labels;
+      c.data.datasets[0].data = prices;
+      c.data.datasets[0].borderColor = color;
+      c.data.datasets[0].backgroundColor = bgColor;
+      c.update();
+      return;
     }
 
-    async function fetchStockData(symbol) {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=1d`;
-      const resp = await fetch(url);
-      return (await resp.json()).chart.result[0];
-    }
+    const ctx = document.getElementById(canvasId)?.getContext("2d");
+    if (!ctx) return;
 
-    function getChangeClass(change) {
-      if (change > 0) return "change-up";
-      if (change < 0) return "change-down";
-      return "change-neutral";
-    }
-
-    function createOrUpdateChart(canvasId, labels, prices, label) {
-      if (charts[canvasId]) {
-        charts[canvasId].data.labels = labels;
-        charts[canvasId].data.datasets[0].data = prices;
-        charts[canvasId].update();
-      } else {
-        const ctx = document.getElementById(canvasId).getContext('2d');
-        charts[canvasId] = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              label,
-              data: prices,
-              borderColor: 'blue',
-              backgroundColor: 'lightblue',
-              fill: true,
-              tension: 0.3
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } }
-          }
-        });
-      }
-    }
-
-    async function loadStocks() {
-      const container = document.getElementById("stocks");
-      if (!container.dataset.initialized) {
-        container.innerHTML = ""; // Nur beim ersten Laden leeren
-        container.dataset.initialized = "true";
-      }
-
-      const currencies = [...new Set(stocks.map(s => s.currency))];
-      for (const cur of currencies) {
-        fxRates[cur] = await fetchExchangeRate(cur);
-      }
-
-      for (const s of stocks) {
-        try {
-          const d = await fetchStockData(s.symbol);
-          const ts = d.timestamp;
-          const raw = d.indicators.quote[0].close;
-          const rate = fxRates[s.currency];
-          const prices = raw.map(p => p * rate);
-          const dates = ts.map(t => new Date(t * 1000).toLocaleDateString());
-          const last = prices.at(-1);
-          const prev = prices.at(-2);
-          const change = last - prev;
-          const pct = (change / prev) * 100;
-          const cls = getChangeClass(change);
-          const id = `c-${s.symbol}`;
-
-          let div = document.getElementById(`item-${s.symbol}`);
-          if (!div) {
-            div = document.createElement("div");
-            div.className = "item";
-            div.id = `item-${s.symbol}`;
-            div.innerHTML = `
-              <h2>${s.name} (${s.symbol})</h2>
-              <p id="price-${s.symbol}"></p>
-              <p><a href="${s.link}" target="_blank">📊 Mehr bei Finanzen.net</a></p>
-              <canvas id="${id}" height="150"></canvas>
-            `;
-            container.appendChild(div);
-          }
-          document.getElementById(`price-${s.symbol}`).innerHTML = `
-            Kurs in €: <strong>${last.toFixed(2)} €</strong>
-            <span class="${cls}">(${change >= 0 ? '+' : ''}${change.toFixed(2)} € / ${pct.toFixed(2)}%)</span>
-          `;
-          createOrUpdateChart(id, dates, prices, s.name + ' (€)');
-        } catch (e) {
-          console.error("Fehler bei", s.symbol, e);
+    charts[canvasId] = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          data: prices,
+          borderColor: color,
+          backgroundColor: bgColor,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointHoverRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+          y: { grid: { color: "#f0f0f0" }, ticks: { font: { size: 10 }, callback: v => v.toFixed(2) + " €" } }
         }
       }
+    });
+  }
+
+  /* ════════════════════════════════════════
+     KARTE bauen
+  ════════════════════════════════════════ */
+  function getOrCreateCard(id) {
+    let card = document.getElementById(id);
+    if (!card) {
+      card = document.createElement("div");
+      card.className = "card";
+      card.id = id;
+      document.getElementById("grid").appendChild(card);
     }
+    return card;
+  }
 
-    async function loadGold() {
-      const goldDiv = document.getElementById("gold");
-      const rhein = 975.93; // Rheinische Scheidestätte 10g Gold
+  function skeletonCard(name, symbol) {
+    const card = getOrCreateCard("card-" + symbol.replace(/[^a-z0-9]/gi, "_"));
+    card.innerHTML = `
+      <div class="card-header">
+        <div>
+          <div class="card-title">${name}</div>
+          <div class="card-symbol">${symbol}</div>
+        </div>
+      </div>
+      <div class="skeleton" style="width:60%; height:28px;"></div>
+      <div class="skeleton" style="width:40%;"></div>
+      <div class="skeleton" style="width:30%;"></div>
+      <div class="skeleton" style="height:120px; margin-top:10px;"></div>
+    `;
+  }
 
-      const resp = await fetch('https://query1.finance.yahoo.com/v7/finance/quote?symbols=GC=F');
-      const d = (await resp.json()).quoteResponse.result[0];
-      const usd = d.regularMarketPrice;
-      const prevUsd = d.regularMarketPreviousClose;
-      const pct = ((usd - prevUsd) / prevUsd) * 100;
-      const fx = await fetchExchangeRate("USD");
-      const perOz = usd * fx;
-      const per10g = perOz / 31.1034768 * 10;
-      const cls = getChangeClass(per10g - prevUsd * fx / 31.1034768 * 10);
+  function fillCard(stock, pricesEUR, labels, latest, prev) {
+    const diff    = latest - prev;
+    const pct     = prev > 0 ? (diff / prev) * 100 : 0;
+    const isUp    = diff >= 0;
+    const cls     = diff > 0 ? "change-up" : diff < 0 ? "change-down" : "change-neutral";
+    const sign    = diff >= 0 ? "+" : "";
+    const symbol  = stock.symbol;
+    const safeId  = symbol.replace(/[^a-z0-9]/gi, "_");
+    const cardId  = "card-" + safeId;
+    const chartId = "chart-" + safeId;
 
-      goldDiv.innerHTML = `
-        <h2>Gold (10 g)</h2>
-        <p>Rheinische Scheidestätte‑Preis: <strong>${rhein.toFixed(2)} €</strong></p>
-        <p>Marktpreis (Finanzen.net): <strong>${per10g.toFixed(2)} €</strong>
-          <span class="${cls}">(${pct.toFixed(2)}%)</span></p>
-        <p><a href="https://www.finanzen.net/rohstoffe/goldpreis/realtimekurse" target="_blank">🪙 Goldpreis auf Finanzen.net</a></p>
-      `;
-    }
+    /* Preis-Label für Gold anpassen */
+    const displayPrice = stock.isGold
+      ? (latest / 31.1034768 * 10).toFixed(2) + " €  (10g)"
+      : latest.toFixed(2) + " €";
 
-    function updateAll() {
-      loadStocks();
-      loadGold();
-    }
+    const card = getOrCreateCard(cardId);
+    card.innerHTML = `
+      <div class="card-header">
+        <div>
+          <div class="card-title">${stock.name}</div>
+          <div class="card-symbol">${symbol}</div>
+        </div>
+        <span class="card-badge">${stock.currency}</span>
+      </div>
 
-    // Initial laden & automatisch alle 60 Sekunden aktualisieren
-    updateAll();
-    setInterval(updateAll, 60000);
+      <div class="price-row">
+        <span class="price-main">${displayPrice}</span>
+        <span class="price-change ${cls}">${sign}${diff.toFixed(2)} € · ${sign}${pct.toFixed(2)}%</span>
+      </div>
 
-    // Manuell per Button
-    document.getElementById("refresh-btn").addEventListener("click", updateAll);
+      <a class="card-link" href="${stock.link}" target="_blank">Details auf Finanzen.net →</a>
+
+      <canvas id="${chartId}" height="140"></canvas>
+    `;
+
+    renderChart(chartId, labels, pricesEUR, isUp);
+  }
+
+  function errorCard(stock, message) {
+    const safeId = stock.symbol.replace(/[^a-z0-9]/gi, "_");
+    const card = getOrCreateCard("card-" + safeId);
+    card.innerHTML = `
+      <div class="card-header">
+        <div>
+          <div class="card-title">${stock.name}</div>
+          <div class="card-symbol">${stock.symbol}</div>
+        </div>
+      </div>
+      <div class="card-error">⚠️ ${message}</div>
+      <a class="card-link" href="${stock.link}" target="_blank">Details auf Finanzen.net →</a>
+    `;
+  }
+
+  /* ════════════════════════════════════════
+     HAUPT-LADEFUNKTION
+  ════════════════════════════════════════ */
+  async function updateAll() {
+    const btn = document.getElementById("refresh-btn");
+    btn.disabled = true;
+    btn.textContent = "⏳ Lädt…";
+
+    document.getElementById("status-banner").textContent = "Daten werden aktualisiert…";
+
+    /* Skeleton anzeigen */
+    STOCKS.forEach(s => skeletonCard(s.name, s.symbol));
+
+    /* Wechselkurse zuerst */
+    await loadFxRates();
+
+    /* Alle Aktien parallel laden */
+    await Promise.all(STOCKS.map(async stock => {
+      try {
+        const data    = await fetchChartData(stock.symbol);
+        const raw     = data.indicators.quote[0].close.filter(p => p != null);
+        const ts      = data.timestamp;
+        const rate    = fxRates[stock.currency] ?? 1;
+
+        const pricesEUR = raw.map(p => p * rate);
+        const labels    = ts.slice(0, raw.length).map(t =>
+          new Date(t * 1000).toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })
+        );
+
+        const latest = (data.meta?.regularMarketPrice ?? raw.at(-1)) * rate;
+        const prev   = pricesEUR.at(-2) ?? pricesEUR.at(-1);
+
+        fillCard(stock, pricesEUR, labels, latest, prev);
+
+      } catch (e) {
+        console.error(stock.symbol, e);
+        errorCard(stock, "Daten konnten nicht geladen werden.");
+      }
+    }));
+
+    /* Status aktualisieren */
+    const now = new Date().toLocaleTimeString("de-DE");
+    document.getElementById("last-update").textContent = "Stand: " + now;
+    document.getElementById("status-banner").textContent = "";
+
+    btn.disabled = false;
+    btn.textContent = "🔄 Aktualisieren";
+  }
+
+  /* ════════════════════════════════════════
+     START
+  ════════════════════════════════════════ */
+  document.getElementById("refresh-btn").addEventListener("click", updateAll);
+  updateAll();
+  setInterval(updateAll, 60000);
   </script>
 </body>
 </html>
