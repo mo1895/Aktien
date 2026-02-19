@@ -2,129 +2,101 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>🚀 Space Portfolio Live</title>
+    <title>Portfolio Übersicht</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-
-        * { box-sizing: border-box; }
-
         body {
-            font-family: 'Orbitron', monospace;
             margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0c0c1e, #1a1a3a, #0f0f2a, #000);
-            background-attachment: fixed;
-            color: #e0e7ff;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Sternenhimmel Animation */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
-                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
-                radial-gradient(3px 3px at 200px 120px, #00d4ff, transparent);
-            background-repeat: repeat;
-            background-size: 250px 150px;
-            animation: stars-twinkle 25s linear infinite;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        @keyframes stars-twinkle {
-            0% { transform: translateY(0) rotate(0); opacity: 1; }
-            100% { transform: translateY(-150px) rotate(2deg); opacity: .7; }
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 30px;
-            font-size: 2.8em;
-            font-weight: 900;
-            background: linear-gradient(45deg, #00d4ff, #7b68ee, #ff6b9d, #00ff88);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: rainbow-glow 3s infinite alternate, glow 2s infinite alternate;
+            font-size: 32px;
+            font-weight: 600;
         }
 
-        @keyframes rainbow-glow {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
-        }
-
-        @keyframes glow {
-            from { filter: drop-shadow(0 0 15px #00d4ff); }
-            to { filter: drop-shadow(0 0 30px #7b68ee); }
-        }
-
-        .refresh-btn {
+        .button {
             display: block;
             margin: 0 auto 30px;
-            padding: 18px 30px;
-            background: linear-gradient(45deg, #00d4ff, #0099cc, #00bfff);
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
+            padding: 12px 22px;
+            background: #2867B2;
             color: white;
-            font-size: 16px;
-            font-weight: 700;
-            font-family: Orbitron;
-            letter-spacing: 2px;
-            box-shadow: 0 10px 40px rgba(0, 212, 255, .4);
-            transition: .3s;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
         }
 
-        .refresh-btn:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 60px rgba(0, 212, 255, .7);
+        .button:hover {
+            background: #1d4c86;
+        }
+
+        .summary-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .stock {
-            background: rgba(20,25,70,.85);
-            margin-bottom: 40px;
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid rgba(0,212,255,.4);
-            box-shadow: 0 25px 80px rgba(0,0,0,.6);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 0 auto 30px;
+            max-width: 800px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .change-up { color: #00ff88; font-weight: bold; }
-        .change-down { color: #ff6b9d; font-weight: bold; }
-        .change-neutral { color: #ccc; font-weight: bold; }
+        .stock h2 {
+            margin-top: 0;
+        }
 
-        .rating-section { margin-top: 15px; }
-        .rating-comment { font-size: 14px; margin-top: 8px; opacity: .9; }
+        .change-up { color: #2ecc71; }
+        .change-down { color: #e74c3c; }
+        .change-neutral { color: #555; }
 
-        a { color: #00d4ff; text-decoration: none; }
+        .rating {
+            margin-top: 10px;
+            color: #f39c12;
+        }
+
+        a {
+            color: #2867B2;
+            text-decoration: none;
+        }
         a:hover { text-decoration: underline; }
 
+        #last-update {
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+            font-size: 14px;
+        }
     </style>
 </head>
+
 <body>
 
-<h1>📈 Meine Aktienkurse (alle in €) + Bewertungen</h1>
-<button id="refresh-btn" class="refresh-btn">🔃 Aktualisieren</button>
+<h1>Mein Aktien-Portfolio</h1>
 
-<div id="portfolio-summary">
+<button id="refresh-btn" class="button">Aktualisieren</button>
+
+<div class="summary-box">
     <h2>Portfolio Übersicht</h2>
     <div id="total-value">Wird berechnet...</div>
     <div id="portfolio-change" class="change-neutral"></div>
 </div>
 
-<div id="stocks"><p>Lade Aktiendaten...</p></div>
+<div id="stocks">Lade Daten…</div>
 
 <div id="last-update"></div>
 
@@ -132,178 +104,103 @@
 /* ------------------ KONFIG ------------------ */
 
 const stocks = [
-    {
-        name: "Lufthansa",
-        symbol: "LHA.DE",
-        link: "https://www.finanzen.net/aktien/lufthansa-aktie",
-        shares: 5,
-        rating: { score: 3.5, comment: "Leicht unterbewertet, positive Prognosen bis 2026. Analysten neutral → Buy-Potenzial!" }
-    },
-    {
-        name: "DroneShield",
-        symbol: "DRO.AX",
-        link: "https://www.finanzen.net/aktien/droneshield-aktie",
-        shares: 30,
-        rating: { score: 4.5, comment: "Explosives Wachstum erwartet – starkes BUY!" }
-    },
-    {
-        name: "BYD",
-        symbol: "1211.HK",
-        link: "https://www.finanzen.net/aktien/byd-aktie",
-        shares: 4,
-        rating: { score: 4.0, comment: "EV-Markt Leader. Buy!" }
-    },
-    {
-        name: "Intel",
-        symbol: "INTC",
-        link: "https://www.finanzen.net/aktien/intel-aktie",
-        shares: 2,
-        rating: { score: 2.5, comment: "Unterbewertet, aber hohes Risiko." }
-    },
-    {
-        name: "Siemens Energy",
-        symbol: "ENR.DE",
-        link: "https://www.finanzen.net/aktien/siemens_energy-aktie",
-        shares: 2,
-        rating: { score: 3.8, comment: "Leicht unterbewertet. Halten/Buy." }
-    },
-    {
-        name: "Clara Tech",
-        symbol: "CLA.DE",
-        link: "#",
-        shares: 10,
-        rating: { score: 2.0, comment: "Sehr spekulativ." },
-        fixedPrice: 3.50
-    }
+    { name: "Lufthansa", symbol: "LHA.DE", shares: 5, link: "https://www.finanzen.net/aktien/lufthansa-aktie", rating: { score: 3.5, comment: "Unterbewertet. Gute Aussichten." } },
+    { name: "DroneShield", symbol: "DRO.AX", shares: 30, link: "https://www.finanzen.net/aktien/droneshield-aktie", rating: { score: 4.5, comment: "Starker Wachstumswert." } },
+    { name: "BYD", symbol: "1211.HK", shares: 4, link: "https://www.finanzen.net/aktien/byd-aktie", rating: { score: 4.0, comment: "EV-Leader. Buy." } },
+    { name: "Intel", symbol: "INTC", shares: 2, link: "https://www.finanzen.net/aktien/intel-aktie", rating: { score: 2.5, comment: "Risiko, aber Potential." } },
+    { name: "Siemens Energy", symbol: "ENR.DE", shares: 2, link: "https://www.finanzen.net/aktien/siemens_energy-aktie", rating: { score: 3.8, comment: "Turnaround möglich." } },
+    { name: "Clara Tech", symbol: "CLA.DE", shares: 10, link: "#", fixedPrice: 3.5, rating: { score: 2.0, comment: "Spekulativ." } }
 ];
 
 const exchangeRates = { AUD: 0.60, HKD: 0.12, USD: 0.92 };
-let portfolioData = { totalValue: 0, previousValue: 0 };
+let portfolio = { total: 0, last: 0 };
 
-/* ------------------ API ------------------ */
+/* ------------------ DATENHOLEN ------------------ */
 
-async function fetchStockData(symbol) {
+async function fetchStock(symbol) {
     if (symbol === "CLA.DE") {
-        const now = Math.floor(Date.now() / 1000);
         return {
-            timestamp: [1,2,3,4,5].map(i => now - (5-i)*86400),
+            timestamp: [1,2,3,4,5],
             indicators: { quote: [{ close: [3.5,3.5,3.5,3.5,3.5] }] },
             meta: { regularMarketPrice: 3.5 }
         };
     }
 
-    const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=1d`;
-    const proxies = [
-        url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
-    ];
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=1d`;
 
-    for (const proxy of proxies) {
-        try {
-            let url = proxy(apiUrl);
-            let res = await fetch(url);
-            let data = await res.json();
+    const proxied = `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
-            if (data.contents) data = JSON.parse(data.contents);
-            if (data.chart?.result?.[0]) return data.chart.result[0];
+    let res = await fetch(proxied);
+    let json = await res.json();
 
-        } catch (e) { continue; }
-    }
-
-    return simulate(symbol);
+    return json.chart.result[0];
 }
 
-function simulate(symbol) {
-    const base = { "LHA.DE": 5.8, "DRO.AX": 0.25, "1211.HK": 250, "INTC": 25, "ENR.DE": 28 }[symbol] || 10;
-    const now = Date.now()/1000;
-
-    return {
-        timestamp: [1,2,3,4,5].map(i => now - (5-i)*86400),
-        indicators: { quote: [{ close: [base*0.98, base*0.99, base, base*1.01, base*1.02] }] },
-        meta: { regularMarketPrice: base*1.02 }
-    };
-}
-
-function convertToEUR(price, symbol) {
+function convert(price, symbol) {
     if (symbol.endsWith(".DE")) return price;
     if (symbol.endsWith(".AX")) return price * exchangeRates.AUD;
     if (symbol.endsWith(".HK")) return price * exchangeRates.HKD;
     return price * exchangeRates.USD;
 }
 
-/* ------------- RENDERN ---------------- */
+/* ------------------ UI ------------------ */
 
-function starRating(rating) {
-    let full = Math.floor(rating);
-    let half = rating % 1 !== 0;
-    let html = "";
+function starRating(score) {
+    let full = Math.floor(score);
+    let half = score % 1 !== 0;
+    let out = "";
 
     for (let i = 0; i < 5; i++) {
-        if (i < full) html += '<i class="fas fa-star"></i>';
-        else if (i === full && half) html += '<i class="fas fa-star-half-alt"></i>';
-        else html += '<i class="far fa-star"></i>';
+        if (i < full) out += '<i class="fas fa-star"></i>';
+        else if (i === full && half) out += '<i class="fas fa-star-half-alt"></i>';
+        else out += '<i class="far fa-star"></i>';
     }
-
-    return html;
+    return out;
 }
 
 async function loadStocks() {
     const container = document.getElementById("stocks");
-    container.innerHTML = "<p>Lade...</p>";
-
-    portfolioData.previousValue = portfolioData.totalValue;
-    portfolioData.totalValue = 0;
-
     container.innerHTML = "";
 
-    for (const stock of stocks) {
-        const div = document.createElement("div");
-        div.className = "stock";
-        div.innerHTML = `<h2>${stock.name} (${stock.symbol})</h2><p>Daten werden geladen...</p>`;
-        container.appendChild(div);
+    portfolio.last = portfolio.total;
+    portfolio.total = 0;
+
+    for (const s of stocks) {
+        let box = document.createElement("div");
+        box.className = "stock";
+        box.innerHTML = `<h2>${s.name}</h2>Lade…`;
+        container.appendChild(box);
 
         try {
-            const data = await fetchStockData(stock.symbol);
+            const data = await fetchStock(s.symbol);
 
-            const timestamps = data.timestamp;
             const prices = data.indicators.quote[0].close;
+            const latest = convert(data.meta.regularMarketPrice, s.symbol);
+            const previous = convert(prices[prices.length-2], s.symbol);
+            const diff = latest - previous;
 
-            const pricesEUR = prices.map(p => convertToEUR(p, stock.symbol));
-            const latest = convertToEUR(data.meta.regularMarketPrice, stock.symbol);
-            const prev = pricesEUR[pricesEUR.length-2];
-            const diff = latest - prev;
+            const value = latest * s.shares;
+            portfolio.total += value;
 
-            const changeClass = diff > 0 ? "change-up" : diff < 0 ? "change-down" : "change-neutral";
+            box.innerHTML = `
+                <h2>${s.name} (${s.symbol})</h2>
+                
+                <p>Preis: <strong>${latest.toFixed(2)} €</strong>
+                <span class="${diff>0?'change-up':diff<0?'change-down':'change-neutral'}">
+                    (${diff>=0?'+':''}${diff.toFixed(2)} €)
+                </span></p>
 
-            const positionValue = latest * stock.shares;
-            portfolioData.totalValue += positionValue;
+                <p>Anteile: ${s.shares} – Gesamtwert: <strong>${value.toFixed(2)} €</strong></p>
 
-            div.innerHTML = `
-                <h2>${stock.name} (${stock.symbol})</h2>
-
-                <p>Aktueller Kurs:
-                    <strong>${latest.toFixed(2)} €</strong>
-                    <span class="${changeClass}">
-                        (${diff>=0?'+':''}${diff.toFixed(2)} €)
-                    </span>
-                </p>
-
-                <p>Anteile: ${stock.shares} – Wert:
-                    <strong>${positionValue.toFixed(2)} €</strong>
-                </p>
-
-                <div class="rating-section">
-                    <div>${starRating(stock.rating.score)} ${stock.rating.score}/5</div>
-                    <div class="rating-comment">${stock.rating.comment}</div>
+                <div class="rating">
+                    ${starRating(s.rating.score)} (${s.rating.score}/5)
                 </div>
+                <small>${s.rating.comment}</small><br><br>
 
-                <p><a href="${stock.link}" target="_blank">📊 Auf Finanzen.net ansehen</a></p>
+                <a href="${s.link}" target="_blank">Details ansehen</a>
             `;
         } catch (e) {
-            div.innerHTML = `
-                <h2>${stock.name}</h2>
-                <p class="change-down">Fehler beim Laden</p>
-            `;
+            box.innerHTML = `<h2>${s.name}</h2>Fehler beim Laden`;
         }
     }
 
@@ -311,24 +208,24 @@ async function loadStocks() {
 }
 
 function updateSummary() {
-    document.getElementById("total-value")
-        .textContent = "Gesamtwert: " + portfolioData.totalValue.toFixed(2) + " €";
+    document.getElementById("total-value").textContent =
+        "Gesamtwert: " + portfolio.total.toFixed(2) + " €";
 
-    const change = portfolioData.totalValue - portfolioData.previousValue;
+    const diff = portfolio.total - portfolio.last;
     const el = document.getElementById("portfolio-change");
 
-    if (portfolioData.previousValue > 0) {
-        el.className = change > 0 ? "change-up" : change < 0 ? "change-down" : "change-neutral";
-        el.textContent = (change>=0?"+":"") + change.toFixed(2) + " €";
+    if (portfolio.last > 0) {
+        el.className = diff > 0 ? "change-up" : diff < 0 ? "change-down" : "change-neutral";
+        el.textContent = (diff >= 0 ? "+" : "") + diff.toFixed(2) + " €";
     }
 
     document.getElementById("last-update").textContent =
-        "Letzte Aktualisierung: " + new Date().toLocaleTimeString();
+        "Zuletzt aktualisiert: " + new Date().toLocaleTimeString();
 }
 
-document.getElementById("refresh-btn").onclick = () => loadStocks();
-loadStocks();
+document.getElementById("refresh-btn").onclick = loadStocks;
 
+loadStocks();
 </script>
 
 </body>
